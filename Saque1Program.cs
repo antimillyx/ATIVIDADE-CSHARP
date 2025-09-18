@@ -66,3 +66,9 @@ class Program
         conta.Extrato();
     }
 }
+
+// RESULTADO
+Saldo final: R$ 700.00
+Extrato:
+Depósito de R$ 1000.00
+Saque de R$ 300.00
