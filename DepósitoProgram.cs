@@ -3,14 +3,14 @@ using System.Collections.Generic;
 
 public class ContaCorrente
 {
-    public string Agencia { get; private set; }
-    public string Numero { get; private set; }
-    public string Titular { get; private set; }
-    public double Saldo { get; private set; }
-    public double Limite { get; private set; }
-    public List<string> Transacoes { get; private set; }
+    public string Agencia { get; }
+    public string Numero { get; }
+    public string Titular { get; }
+    public decimal Saldo { get; private set; }
+    public decimal Limite { get; }
+    public List<string> Transacoes { get; }
 
-    public ContaCorrente(string agencia, string numero, string titular, double limite)
+    public ContaCorrente(string agencia, string numero, string titular, decimal limite)
     {
         Agencia = agencia;
         Numero = numero;
@@ -18,39 +18,29 @@ public class ContaCorrente
         Limite = limite;
         Saldo = 0;
         Transacoes = new List<string>();
-        Transacoes.Add($"Conta aberta com limite de R$ {limite:F2}");
     }
 
-    public void Depositar(double valor)
+    public void Depositar(decimal valor)
     {
-        if (valor <= 0)
-        {
-            throw new ArgumentException("Valor de depósito deve ser positivo");
-        }
-        
         Saldo += valor;
-        Transacoes.Add($"Depósito de R$ {valor:F2} - Saldo: R$ {Saldo:F2}");
+        Transacoes.Add($"Depósito de R$ {valor:F2}");
     }
 
-    public void Sacar(double valor)
+    public bool Sacar(decimal valor)
     {
-        if (valor <= 0)
+        if (valor <= Saldo + Limite)
         {
-            throw new ArgumentException("Valor de saque deve ser positivo");
+            Saldo -= valor;
+            Transacoes.Add($"Saque de R$ {valor:F2}");
+            return true;
         }
-
-        if (valor > Saldo + Limite)
-        {
-            throw new InvalidOperationException("Saldo insuficiente para saque");
-        }
-
-        Saldo -= valor;
-        Transacoes.Add($"Saque de R$ {valor:F2} - Saldo: R$ {Saldo:F2}");
+        Transacoes.Add($"Tentativa de saque de R$ {valor:F2} (saldo insuficiente)");
+        return false;
     }
 
     public void Extrato()
     {
-        Console.WriteLine("\nExtrato da Conta:");
+        Console.WriteLine("Extrato:");
         foreach (var transacao in Transacoes)
         {
             Console.WriteLine(transacao);
@@ -60,31 +50,23 @@ public class ContaCorrente
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+  
+        var conta = new ContaCorrente("1234", "56789", "Maria Silva", 500.00m);
+        
 
-        ContaCorrente conta = new ContaCorrente(
-            agencia: "1234",
-            numero: "56789",
-            titular: "Maria Silva",
-            limite: 500.00
-        );
-
-        try
-        //DEPÓSITO DE 1 MIL
-        {
-
-            conta.Depositar(1000.00);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Erro durante operação: {ex.Message}");
-        }
-
-
-        Console.WriteLine($"\nSaldo final: R$ {conta.Saldo:F2}");
-
-
+        conta.Depositar(1000.00m);
+        
+       
+        Console.WriteLine($"Saldo final: R$ {conta.Saldo:F2}");
         conta.Extrato();
     }
 }
+
+
+//RESULTADO
+
+Saldo final: R$ 1000.00
+Extrato:
+Depósito de R$ 1000.00
